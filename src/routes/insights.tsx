@@ -1,0 +1,21 @@
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DemoBadge, PageIntro, Segmented } from "@/components/sports-ui";
+import { insights } from "@/lib/sports-data";
+export const Route=createFileRoute("/insights")({head:()=>({meta:[{title:"Automated Insights — SportsMax"},{name:"description",content:"Review automated performance alerts, training insights, milestones, and recommendations generated from demo sports data."},{property:"og:title",content:"Automated Insights — SportsMax"},{property:"og:description",content:"Performance signals translated into useful, timely intelligence."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}],links:[{rel:"canonical",href:"/insights"}]}),component:Insights});
+function Insights(){const [period,setPeriod]=useState("30 Days");const [open,setOpen]=useState(0);
+const typeBadges: Record<string, string> = {
+  milestone: "bg-chart-2/15 text-chart-2 border-chart-2/30",
+  alert: "bg-destructive/15 text-destructive border-destructive/30",
+  recommendation: "bg-accent/15 text-accent border-accent/30",
+  trend: "bg-primary/15 text-primary border-primary/30"
+};
+const borderColors: Record<string, string> = {
+  milestone: "border-l-chart-2",
+  alert: "border-l-destructive",
+  recommendation: "border-l-accent",
+  trend: "border-l-primary"
+};
+return <><PageIntro eyebrow="Automated insights" title="Intelligence that keeps up with performance." text="See the alerts, patterns, milestones, and next actions SportsMax detects across training activity." action={<div className="flex flex-col items-end gap-3"><DemoBadge/><Segmented values={["7 Days","30 Days","90 Days"]} value={period} onChange={setPeriod}/></div>}/><section className="py-12"><div className="content-wrap grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]"><div className="grid gap-3">{insights.map((item,index)=><article key={item.title} className={`surface-card border-l-4 ${borderColors[item.type] || "border-l-primary"} overflow-hidden transition`}><button className="grid w-full grid-cols-[minmax(0,1fr)_auto] gap-5 p-5 text-left" onClick={()=>setOpen(open===index?-1:index)} aria-expanded={open===index}><div><span className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider ${typeBadges[item.type] || "bg-primary/10 text-primary border-primary/30"}`}>{item.type}</span><h2 className="mt-2 text-xl font-semibold">{item.title}</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.detail}</p></div><div className="flex items-start gap-4"><span className="font-mono text-sm font-semibold text-primary">{item.metric}</span>{open===index?<ChevronUp className="h-5 w-5 text-muted-foreground"/>:<ChevronDown className="h-5 w-5 text-muted-foreground"/>}</div></button>{open===index&&<div className="border-t border-border bg-secondary/30 p-5 text-sm leading-6 text-muted-foreground"><p><strong className="text-foreground">Why this matters:</strong> This signal combines recent sessions with your rolling baseline to highlight changes worth reviewing.</p><p className="mt-2"><strong className="text-foreground">Suggested action:</strong> Review the supporting sessions before adjusting your training load.</p></div>}</article>)}</div><aside className="surface-card h-fit p-6 lg:sticky lg:top-24"><div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20"><Sparkles className="h-5 w-5"/></div><h2 className="mt-5 text-xl font-semibold">Insight engine</h2><p className="mt-3 text-sm leading-6 text-muted-foreground">Automated signals active for this athlete profile. New sessions refresh trend detection automatically.</p><div className="mt-6 grid gap-3 text-sm">{[["Signals analyzed","28"],["Confidence score","94% High"],["Analysis window",period],["Engine status","Active · Real-time"]].map(([a,b])=><div key={a} className="flex justify-between border-b border-border pb-3"><span className="text-muted-foreground">{a}</span><span className="font-medium text-foreground">{b}</span></div>)}</div><Button className="mt-6 w-full glow-sm">Refresh insights</Button></aside></div></section></>}

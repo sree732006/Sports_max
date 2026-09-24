@@ -1,0 +1,61 @@
+import type { ReactNode } from "react";
+import { ArrowUpRight, Info, Sparkles, TrendingDown, TrendingUp } from "lucide-react";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { cn } from "@/lib/utils";
+
+export function DemoBadge() { return <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-widest text-primary"><span className="h-1.5 w-1.5 rounded-full bg-primary pulse-glow" />Demo data</span>; }
+export function Eyebrow({ children }: { children: ReactNode }) { return <div className="mb-4 flex items-center gap-2.5 text-xs font-bold uppercase tracking-[0.18em] text-primary"><span className="h-px w-8 bg-gradient-to-r from-primary to-transparent" />{children}</div>; }
+export function PageIntro({ eyebrow, title, text, action }: { eyebrow: string; title: string; text: string; action?: ReactNode }) { return <section className="page-intro"><div className="content-wrap grid gap-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end"><div className="max-w-3xl"><Eyebrow>{eyebrow}</Eyebrow><h1 className="text-balance text-4xl font-semibold leading-[1.05] text-foreground sm:text-5xl lg:text-6xl">{title}</h1><p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">{text}</p></div>{action}</div></section>; }
+export function SectionHead({ eyebrow, title, text, action }: { eyebrow?: string; title: string; text?: string; action?: ReactNode }) { return <div className="mb-8 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-5"><div className="min-w-0">{eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}<h2 className="text-balance text-2xl font-semibold sm:text-3xl">{title}</h2>{text && <p className="mt-3 max-w-2xl leading-7 text-muted-foreground">{text}</p>}</div>{action}</div>; }
+export function MetricCard({ label, value, note, icon, trend }: { label: string; value: string; note?: string; icon?: ReactNode; trend?: "up" | "down" | "flat" }) { return <article className="metric-card"><div className="flex items-start justify-between gap-3"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p><span className="text-primary">{icon ?? <TrendingUp className="h-4 w-4" />}</span></div><p className="mt-5 text-3xl font-semibold tabular-nums text-foreground">{value}</p>{note && <p className={cn("mt-2 flex items-center gap-1 text-xs font-medium", trend === "up" ? "trend-up" : trend === "down" ? "trend-down" : "text-muted-foreground")}>{trend === "up" && <TrendingUp className="h-3 w-3" />}{trend === "down" && <TrendingDown className="h-3 w-3" />}{note}</p>}</article>; }
+const tooltipStyle = { backgroundColor: "var(--popover)", border: "1px solid var(--border)", borderRadius: "6px", color: "var(--popover-foreground)", fontSize: "12px", boxShadow: "0 8px 24px rgba(0,0,0,.4)" };
+export function LineChartCard({ title, subtitle, data, keys = ["performance"], unit = "" }: { title: string; subtitle?: string; data: Array<Record<string, string | number>>; keys?: string[]; unit?: string }) { return <article className="chart-card"><div className="mb-6"><h3 className="font-semibold">{title}</h3>{subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}</div><div className="h-64 w-full"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ top: 8, right: 8, left: -22, bottom: 0 }}><defs>{keys.map((key,i)=><linearGradient key={key} id={`lg-${key}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={i===0?"var(--chart-1)":"var(--chart-2)"} stopOpacity={0.3}/><stop offset="100%" stopColor={i===0?"var(--chart-1)":"var(--chart-2)"} stopOpacity={0}/></linearGradient>)}</defs><CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false}/><XAxis dataKey="label" stroke="var(--muted-foreground)" tickLine={false} axisLine={false} tick={{fontSize:11}}/><YAxis stroke="var(--muted-foreground)" tickLine={false} axisLine={false} tick={{fontSize:11}}/><Tooltip contentStyle={tooltipStyle} formatter={(value) => [`${value}${unit}`, ""]}/>{keys.map((key, i) => <Line key={key} type="monotone" dataKey={key} stroke={i === 0 ? "var(--chart-1)" : "var(--chart-2)"} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: i===0?"var(--chart-1)":"var(--chart-2)" }} />)}</LineChart></ResponsiveContainer></div></article>; }
+export function BarChartCard({ title, subtitle, data, dataKey = "distance" }: { title: string; subtitle?: string; data: Array<Record<string, string | number>>; dataKey?: string }) { return <article className="chart-card"><div className="mb-6"><h3 className="font-semibold">{title}</h3>{subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}</div><div className="h-64 w-full"><ResponsiveContainer width="100%" height="100%"><BarChart data={data} margin={{ top: 8, right: 8, left: -22, bottom: 0 }}><CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false}/><XAxis dataKey="label" stroke="var(--muted-foreground)" tickLine={false} axisLine={false} tick={{fontSize:11}}/><YAxis stroke="var(--muted-foreground)" tickLine={false} axisLine={false} tick={{fontSize:11}}/><Tooltip contentStyle={tooltipStyle}/><Bar dataKey={dataKey} fill="var(--chart-1)" radius={[4,4,0,0]} opacity={0.85} /></BarChart></ResponsiveContainer></div></article>; }
+export function AreaChartCard({ title, data }: { title: string; data: Array<Record<string, string | number>> }) { return <article className="chart-card"><h3 className="mb-6 font-semibold">{title}</h3><div className="h-64"><ResponsiveContainer><AreaChart data={data} margin={{ top: 8, right: 8, left: -22, bottom: 0 }}><defs><linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.4}/><stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0}/></linearGradient><linearGradient id="areaFill2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--chart-2)" stopOpacity={0.3}/><stop offset="100%" stopColor="var(--chart-2)" stopOpacity={0}/></linearGradient></defs><CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false}/><XAxis dataKey="label" stroke="var(--muted-foreground)" tickLine={false} axisLine={false} tick={{fontSize:11}}/><YAxis stroke="var(--muted-foreground)" tickLine={false} axisLine={false} tick={{fontSize:11}}/><Tooltip contentStyle={tooltipStyle}/><Area type="monotone" dataKey="performance" stroke="var(--chart-1)" fill="url(#areaFill)" strokeWidth={2.5}/><Area type="monotone" dataKey="consistency" stroke="var(--chart-2)" fill="url(#areaFill2)" strokeWidth={2}/></AreaChart></ResponsiveContainer></div></article>; }
+const insightBorderColors: Record<string, string> = { "Performance Trend": "border-l-primary", "Performance alert": "border-l-primary", "Training Pattern": "border-l-accent", "Training insight": "border-l-accent", "Consistency": "border-l-chart-2", "Pace": "border-l-chart-1", "Milestone": "border-l-chart-4", "Recovery Pattern": "border-l-chart-3", "Endurance": "border-l-chart-2", "Goal Progress": "border-l-primary", "Recommendation": "border-l-chart-4" };
+export function InsightCard({ type, title, detail, metric, className }: { type: string; title: string; detail: string; metric?: string; className?: string }) { const borderColor = insightBorderColors[type] ?? "border-l-primary"; return <article className={cn("group surface-card border-l-2 p-5 transition", borderColor, className)}><div className="flex items-center justify-between gap-4"><span className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">{type}</span>{metric && <span className="font-mono text-sm text-foreground">{metric}</span>}</div><h3 className="mt-4 text-lg font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{detail}</p><div className="mt-5 flex items-center gap-2 text-xs font-semibold text-muted-foreground"><Sparkles className="h-3.5 w-3.5 text-primary" />Generated from performance signals</div></article>; }
+export function Workflow({ title, steps, description }: { title: string; steps: string[]; description: string }) { return <article className="surface-card overflow-hidden"><div className="border-b border-border p-6"><p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Automation flow</p><h3 className="mt-2 text-xl font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p></div><div className="grid gap-0 p-4 sm:grid-cols-3 lg:grid-cols-6">{steps.map((step, index) => <div key={step} className="relative flex min-h-24 items-center gap-3 border-b border-border p-3 last:border-0 sm:border-b-0 sm:border-r sm:last:border-r-0"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-primary/10 font-mono text-xs font-bold text-primary">{String(index + 1).padStart(2,"0")}</span><span className="text-sm font-medium">{step}</span>{index < steps.length - 1 && <ArrowUpRight className="absolute right-1 top-2 h-3.5 w-3.5 text-muted-foreground" />}</div>)}</div></article>; }
+export function DemoNotice({ children = "Analytics-based demo guidance. Not medical advice. Review with a qualified coach before making training changes." }: { children?: ReactNode }) { return <div className="flex items-start gap-3 rounded-md border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground"><Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" /><span>{children}</span></div>; }
+export function Segmented({ values, value, onChange }: { values: string[]; value: string; onChange: (value: string) => void }) { return <div className="inline-flex rounded-md border border-border bg-secondary/80 p-1" role="group" aria-label="Time period">{values.map((item) => <button key={item} onClick={() => onChange(item)} className={cn("rounded px-3 py-1.5 text-xs font-semibold transition-all duration-200", value === item ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-muted/50")}>{item}</button>)}</div>; }
+export function EmptyState({ title = "No data recorded yet", description = "Performance metrics and telemetry will appear here once new sessions are captured.", action }: { title?: string; description?: string; action?: ReactNode }) {
+  return (
+    <div className="surface-card grid min-h-64 place-items-center p-8 text-center">
+      <div className="max-w-md">
+        <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
+          <Info className="h-6 w-6" />
+        </div>
+        <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+        {action && <div className="mt-6 flex justify-center">{action}</div>}
+      </div>
+    </div>
+  );
+}
+
+export function LoadingState({ message = "Calculating performance signals..." }: { message?: string }) {
+  return (
+    <div className="grid min-h-64 place-items-center p-8 text-center">
+      <div>
+        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <p className="mt-4 font-mono text-xs text-muted-foreground">{message}</p>
+      </div>
+    </div>
+  );
+}
+
+export function ErrorState({ title = "Unable to process performance data", message = "A temporary issue occurred while loading this analytics module. Please try again.", onRetry }: { title?: string; message?: string; onRetry?: () => void }) {
+  return (
+    <div className="surface-card border-destructive/30 p-8 text-center">
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-destructive/15 text-destructive ring-1 ring-destructive/30">
+        <Info className="h-6 w-6" />
+      </div>
+      <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+      <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{message}</p>
+      {onRetry && (
+        <button onClick={onRetry} className="mt-5 inline-flex h-9 items-center justify-center rounded-md bg-secondary px-4 text-xs font-semibold text-foreground transition hover:bg-secondary/80">
+          Retry analysis
+        </button>
+      )}
+    </div>
+  );
+}
