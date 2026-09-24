@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Activity, ChevronRight, LogIn, Menu, X, MessageCircle, FileText, Bot } from "lucide-react";
+import { Activity, ChevronRight, LogIn, Menu, X, MessageCircle, FileText, Bot, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -23,36 +23,93 @@ export function SiteFooter() { return <footer className="border-t border-border 
 function FooterGroup({title,items}:{title:string;items:readonly (readonly [string,string])[]}) { return <div><h3 className="text-sm font-semibold">{title}</h3><ul className="mt-4 grid gap-3">{items.map(([label,to])=><li key={label}><Link to={to} className="text-sm text-muted-foreground transition hover:text-primary">{label}</Link></li>)}</ul></div>; }
 
 export function FloatingCTAs() {
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([
+    { role: "bot", content: "Hi! How can I help you today?" }
+  ]);
+  const [inputValue, setInputValue] = useState("");
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputValue.trim()) return;
+    
+    setChatMessages([...chatMessages, { role: "user", content: inputValue }]);
+    setInputValue("");
+    
+    // Simulate bot response
+    setTimeout(() => {
+      setChatMessages(prev => [...prev, { role: "bot", content: "Thanks for reaching out! A representative will connect with you shortly." }]);
+    }, 1000);
+  };
+
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
-      <Button
-        size="icon"
-        variant="secondary"
-        className="h-14 w-14 rounded-full shadow-lg border border-border/50 bg-card hover:bg-muted"
-        onClick={() => alert("Chatbot integration would open here")}
-        title="Chat with us"
-      >
-        <Bot className="h-6 w-6 text-primary" />
-      </Button>
-      <Button
-        size="icon"
-        variant="secondary"
-        className="h-14 w-14 rounded-full shadow-lg border border-border/50 bg-card hover:bg-muted"
-        asChild
-        title="Contact Form"
-      >
-        <Link to="/contact">
-          <FileText className="h-6 w-6 text-primary" />
-        </Link>
-      </Button>
-      <Button
-        size="icon"
-        className="h-14 w-14 rounded-full shadow-lg bg-[#25D366] hover:bg-[#20b858] text-white"
-        onClick={() => window.open('https://wa.me/1234567890', '_blank')}
-        title="WhatsApp"
-      >
-        <MessageCircle className="h-6 w-6" />
-      </Button>
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 items-end">
+      {/* Chatbot Window */}
+      {isChatOpen && (
+        <div className="mb-4 w-80 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-2xl animate-in slide-in-from-bottom-5 fade-in duration-200">
+          <div className="flex items-center justify-between bg-primary p-4 text-primary-foreground">
+            <div className="flex items-center gap-2">
+              <Bot className="h-5 w-5" />
+              <span className="font-semibold">SportsMax Assistant</span>
+            </div>
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-primary-foreground hover:bg-primary/90" onClick={() => setIsChatOpen(false)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="flex h-64 flex-col gap-3 overflow-y-auto p-4">
+            {chatMessages.map((msg, i) => (
+              <div key={i} className={`flex max-w-[80%] flex-col rounded-2xl px-3 py-2 text-sm ${msg.role === "bot" ? "bg-muted text-foreground self-start rounded-tl-sm" : "bg-primary text-primary-foreground self-end rounded-tr-sm"}`}>
+                {msg.content}
+              </div>
+            ))}
+          </div>
+          
+          <form onSubmit={handleSendMessage} className="border-t border-border/50 p-3 flex gap-2">
+            <Input 
+              placeholder="Type your message..." 
+              className="flex-1 rounded-full text-sm h-10" 
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+            />
+            <Button type="submit" size="icon" className="h-10 w-10 shrink-0 rounded-full">
+              <Send className="h-4 w-4" />
+            </Button>
+          </form>
+        </div>
+      )}
+
+      {/* Floating Buttons */}
+      <div className="flex flex-col gap-3">
+        <Button
+          size="icon"
+          variant="secondary"
+          className="h-14 w-14 rounded-full shadow-lg border border-border/50 bg-card hover:bg-muted"
+          onClick={() => setIsChatOpen(!isChatOpen)}
+          title="Chat with us"
+        >
+          <Bot className="h-6 w-6 text-primary" />
+        </Button>
+        <Button
+          size="icon"
+          variant="secondary"
+          className="h-14 w-14 rounded-full shadow-lg border border-border/50 bg-card hover:bg-muted"
+          asChild
+          title="Contact Form"
+        >
+          <Link to="/contact">
+            <FileText className="h-6 w-6 text-primary" />
+          </Link>
+        </Button>
+        <Button
+          size="icon"
+          className="h-14 w-14 rounded-full shadow-lg bg-[#25D366] hover:bg-[#20b858] text-white"
+          onClick={() => window.open('https://wa.me/1234567890', '_blank')}
+          title="WhatsApp"
+        >
+          <MessageCircle className="h-6 w-6" />
+        </Button>
+      </div>
     </div>
   );
 }
