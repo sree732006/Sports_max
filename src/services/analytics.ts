@@ -138,19 +138,35 @@ export const trackEvent = async (
    SCROLL DEPTH TRACKING
 ================================ */
 
-const scrollDepthsSent = new Set<number>();
+let currentPagePath = "";
+const pageScrollDepthsSent = new Set<number>();
+
+export const resetScrollDepthTracking = (page?: string) => {
+  const currentPath = page || (typeof window !== 'undefined' ? window.location.pathname : "");
+  if (currentPath !== currentPagePath) {
+    currentPagePath = currentPath;
+    pageScrollDepthsSent.clear();
+  }
+};
 
 export const trackScrollDepth = (page?: string) => {
   if (typeof window === 'undefined') return;
 
-  const scrollTop = window.scrollY;
+  const currentPath = page || window.location.pathname;
+  if (currentPath !== currentPagePath) {
+    currentPagePath = currentPath;
+    pageScrollDepthsSent.clear();
+  }
 
-  const documentHeight =
-    document.documentElement.scrollHeight - window.innerHeight;
+  const scrollTop = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+  const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
 
-  if (documentHeight <= 0) return;
-
-  let percentage = Math.round((scrollTop / documentHeight) * 100);
+  let percentage = 0;
+  if (documentHeight <= 0) {
+    percentage = 100;
+  } else {
+    percentage = Math.round((scrollTop / documentHeight) * 100);
+  }
 
   if (percentage > 100) {
     percentage = 100;
@@ -161,12 +177,12 @@ export const trackScrollDepth = (page?: string) => {
   thresholds.forEach((threshold) => {
     if (
       percentage >= threshold &&
-      !scrollDepthsSent.has(threshold)
+      !pageScrollDepthsSent.has(threshold)
     ) {
-      scrollDepthsSent.add(threshold);
+      pageScrollDepthsSent.add(threshold);
 
       trackEvent('scroll_depth', {
-        page: page || window.location.pathname,
+        page: currentPath,
         scrollDepth: threshold,
         details: `${threshold}%`,
       });

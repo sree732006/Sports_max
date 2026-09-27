@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { trackEvent, trackScrollDepth } from "../services/analytics";
+import { trackEvent, trackScrollDepth, resetScrollDepthTracking } from "../services/analytics";
 import { SiteFooter, SiteHeader, FloatingCTAs } from "@/components/site-shell";
 
 function NotFoundComponent() {
@@ -123,19 +123,25 @@ function RootComponent() {
   useEffect(() => {
     trackEvent("page_view", { page: location.pathname });
   }, [location.pathname]);
+
   useEffect(() => {
-  const handleScroll = () => {
-    trackScrollDepth(location.pathname);
-  };
+    resetScrollDepthTracking(location.pathname);
 
-  window.addEventListener("scroll", handleScroll, {
-    passive: true,
-  });
+    const handleScroll = () => {
+      trackScrollDepth(location.pathname);
+    };
 
-  return () => {
-    window.removeEventListener("scroll", handleScroll);
-  };
-}, [location.pathname]);
+    // Evaluate initial scroll position immediately on page load/navigate
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [location.pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
