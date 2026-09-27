@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -11,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { trackEvent, trackScrollDepth } from "../services/analytics";
 import { SiteFooter, SiteHeader, FloatingCTAs } from "@/components/site-shell";
 
 function NotFoundComponent() {
@@ -116,6 +118,24 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+
+  useEffect(() => {
+    trackEvent("page_view", { page: location.pathname });
+  }, [location.pathname]);
+  useEffect(() => {
+  const handleScroll = () => {
+    trackScrollDepth(location.pathname);
+  };
+
+  window.addEventListener("scroll", handleScroll, {
+    passive: true,
+  });
+
+  return () => {
+    window.removeEventListener("scroll", handleScroll);
+  };
+}, [location.pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
